@@ -38,7 +38,7 @@ const UserControllers = {
             if (!name || !email || !password)
                 res.status(HttpCode.BAD_REQUEST).json({ "msg": "veillez remplir ces champs" })
 
-            const Hash = await bcrypt.hash(password, 12)
+            const Hash = await bcrypt.hash(password, 10)
             const user = await Prisma.user.create({
                 data: {
                     name,
@@ -47,10 +47,54 @@ const UserControllers = {
                     role,
                 },
             })
+            res.status(HttpCode.OK).json(user)
         } catch (error) {
             console.error(chalk.red(error));
         }
-    }
+    },
+    modifyUser: async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params
+            const { name, email, password, role } = req.body
+            const updateUser = await Prisma.user.update({
+                where: {
+                    user_id: id
+                },
+                data: {
+                    name,
+                    email,
+                    password,
+                    role
+                },
+            })
+            if (updateUser) {
+                res.json({ msg : "les informations de l'utilisateur ont été modifiées avec succès" })
+                console.log(updateUser)
+            }
+            else res.send({ msg: "impossible de modifier les infos du user" })
+        } catch (error) {
+            console.error(chalk.red(error));
+        }
+    },
+    deleteoneUser: async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params
+            const deleteUser = await Prisma.user.delete({
+                where: {
+                    user_id: id
+                },
+            })
+            if (deleteUser) {
+                res.json({ msg : "l'utilisateur a été supprimé avec succès" })
+                console.log(deleteUser)
+            }
+            else res.send({ msg: "impossible de supprimer l'utilisateur" })
+        } catch (error) {
+            console.error(chalk.red(error));
+        }
+    },
+
+
 };
 
 export default UserControllers;
